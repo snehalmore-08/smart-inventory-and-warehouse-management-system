@@ -1,0 +1,59 @@
+SMART INVENTORY AND WAREHOUSE MANAGEMENT SYSTEM
+
+SOFTWARE ARCHITECTURE
+
+1. Frontend Layer
+The frontend is developed using HTML, CSS, and JavaScript. It provides an interactive user interface for managing products, stock operations, dashboard monitoring, hardware simulation, and analytics.
+
+2. Backend Layer
+The backend is developed using Python and FastAPI. It handles API requests, data validation, inventory processing, stock movement operations, and communication between the frontend and database.
+
+3. API Communication Layer
+REST API endpoints are used to exchange data between the frontend, backend, and hardware system. JSON is used as the data exchange format.
+
+4. Database Layer
+MySQL is used to store product information, stock quantities, reorder levels, weight information, RFID mappings, and inventory transaction records.
+
+5. Hardware Integration Layer
+ESP32 is used as the hardware controller. RFID RC522 is used for identification, while Load Cell and HX711 are used for weight measurement. ESP32 communicates with the backend over Wi-Fi.
+
+6. Server Layer
+Uvicorn is used to run the FastAPI application locally during development.
+
+SYSTEM ARCHITECTURE FLOW
+
+User
+  ↓
+Frontend (HTML, CSS, JavaScript)
+  ↓
+REST API Communication
+  ↓
+Backend (Python + FastAPI)
+  ↓
+Data Processing & Validation
+  ↓
+MySQL Database
+  ↓
+Response to Frontend
+  ↓
+Dashboard / Inventory / Analytics
+
+TECHNOLOGIES USED
+
+Frontend:
+HTML, CSS, JavaScript
+
+Backend:
+Python, FastAPI
+
+Database:
+MySQL
+
+Server:
+Uvicorn
+
+Hardware:
+ESP32, RFID RC522, Load Cell, HX711
+
+Communication:
+REST API, JSON, Wi-Fi

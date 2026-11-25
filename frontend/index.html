@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Inventory & Warehouse Management System | Unified Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Chart.js for warehouse analytics & stock distribution visualizers -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- ================================================================= -->
+    <!-- Unified Dark Navy Sidebar Navigation                              -->
+    <!-- ================================================================= -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="brand-wrapper">
+          <div class="brand-icon">📦</div>
+          <div>
+            <div class="brand-name">SmartWarehouse</div>
+            <div class="brand-sub">IoT & DBMS Engine</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Operations</div>
+        <ul class="sidebar-menu">
+          <li>
+            <a href="#dashboard" class="nav-item active" data-module="dashboard">
+              <span class="nav-icon">📊</span>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#products" class="nav-item" data-module="products">
+              <span class="nav-icon">📦</span>
+              <span>Product Management</span>
+            </a>
+          </li>
+          <li>
+            <a href="#stock-in" class="nav-item" data-module="stock-in">
+              <span class="nav-icon">📥</span>
+              <span>Stock In</span>
+            </a>
+          </li>
+          <li>
+            <a href="#stock-out" class="nav-item" data-module="stock-out">
+              <span class="nav-icon">📤</span>
+              <span>Stock Out</span>
+            </a>
+          </li>
+          <li>
+            <a href="#rfid-hardware" class="nav-item" data-module="rfid-hardware">
+              <span class="nav-icon">📡</span>
+              <span>RFID & Hardware</span>
+            </a>
+          </li>
+          <li>
+            <a href="#analytics" class="nav-item" data-module="analytics">
+              <span class="nav-icon">📈</span>
+              <span>Analytics & Reports</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="nav-section-label">Academic & Curriculum</div>
+        <ul class="sidebar-menu">
+          <li>
+            <a href="#academic" class="nav-item" data-module="academic">
+              <span class="nav-icon">🎓</span>
+              <span>Academic & Viva</span>
+            </a>
+          </li>
+          <li>
+            <a href="/docs" target="_blank" class="nav-item">
+              <span class="nav-icon">📑</span>
+              <span>FastAPI Swagger</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="nav-section-label">Hardware System</div>
+        <ul class="sidebar-menu">
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">⚖️</span>
+              <span>10kg Load Cell (HX711)</span>
+            </div>
+          </li>
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">📡</span>
+              <span>RC522 SPI 13.56MHz</span>
+            </div>
+          </li>
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">⚡</span>
+              <span>ESP32 Xtensa Dual-Core</span>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="hw-pill">
+          <span><span class="hw-dot"></span>ESP32 Wi-Fi Node</span>
+          <strong style="color: #38bdf8;">Port 8000</strong>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================================================================= -->
+    <!-- Main Application Shell                                            -->
+    <!-- ================================================================= -->
+    <div class="app-main">
+
+      <!-- Top App Bar -->
+      <header class="top-appbar">
+        <div class="appbar-title-group">
+          <h2 id="pageTitle">Smart Inventory & Warehouse Management</h2>
+          <p id="pageSubtitle">Autonomous physical stock tracking · Load Cell authentication · Real-time ACID transactions</p>
+        </div>
+        <div class="appbar-actions">
+          <span id="serverStatusBadge" class="status-badge">
+            <span class="status-dot"></span> Checking Server...
+          </span>
+          <button id="refreshBtn" class="btn btn-secondary btn-sm">
+            🔄 Refresh Data
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Canvas -->
+      <main class="content-canvas">
+
+        <!-- Global Toast / Alert Message Container -->
+        <div id="toastContainer" style="margin-bottom: 1.25rem; display: none;"></div>
+
+        <!-- ============================================================= -->
+        <!-- MODULE 1: DASHBOARD VIEW                                      -->
+        <!-- ============================================================= -->
+        <section id="view-dashboard" class="module-view active">
+          
+          <!-- KPI Metrics Grid (5 Cards) -->
+          <div class="kpi-grid">
+            <!-- Card 1: Total Stock Quantity -->
+            <div class="kpi-card accent-blue">
+              <div class="kpi-top-row">
+                <span class="kpi-label">Total Stock Units</span>
+                <div class="kpi-icon icon-blue">📦</div>
+              </div>
+              <div class="kpi-value-row">
+                <span id="metricTotalItems" class="kpi-value">0</span>
+                <span class="kpi-unit">sample units</span>
+              </div>
+              <div class="kpi-footer-note">
+                <span>Across <strong id="metricTotalSKUs">6</strong> grocery items</span>
+              </div>
+            </div>
+
+            <!-- Card 2: 10kg Load Cell Capacity -->
+            <div class="kpi-card accent-teal">
+              <div class="kpi-top-row">
+                <span class="kpi-label">Scale Platform Load</span>
+                <div class="kpi-icon icon-teal">⚖️</div>
+              </div>
+              <div class="kpi-value-row">
+                <span id="metricScaleLoad" class="kpi-value">0.00</span>
+                <span class="kpi-unit">kg / 10.00 kg</span>
+              </div>
+              <div class="kpi-footer-note">
+                <span id="metricScalePercent">0.0% of max load</span>
+              </div>
+            </div>
+
+            <!-- Card 3: Out of Stock (Qty = 0) -->
+            <div class="kpi-card accent-rose">
+              <div class="kpi-top-row">
+                <span class="kpi-label">Out of Stock</span>
+                <div class="kpi-icon icon-rose">🚫</div>
+              </div>
+              <div class="kpi-value-row">
+                <span id="metricOutOfStock" class="kpi-value">0</span>
+                <span class="kpi-unit">items (Qty = 0)</span>
+              </div>
+              <div class="kpi-footer-note" style="color: var(--danger);">
+                Requires stock-in
+              </div>
+            </div>
+
+            <!-- Card 4: Low Stock (0 < Qty <= Reorder) -->
+            <div class="kpi-card accent-amber">
+              <div class="kpi-top-row">
+                <span class="kpi-label">Low Stock Warning</span>
+                <div class="kpi-icon icon-amber">⚠️</div>
+              </div>
+              <div class="kpi-value-row">
+                <span id="metricLowStock" class="kpi-value">0</span>
+                <span class="kpi-unit">items &le; reorder</span>
+              </div>
+              <div class="kpi-footer-note">
+                Priority Min-Heap alert
+              </div>
+            </div>
+
+            <!-- Card 5: Hardware Link -->
+            <div class="kpi-card accent-purple">
+              <div class="kpi-top-row">
+                <span class="kpi-label">Hardware Status</span>
+                <div class="kpi-icon icon-purple">⚡</div>
+              </div>
+              <div class="kpi-value-row">
+                <span id="metricHwStatus" class="kpi-value" style="font-size: 1.35rem;">STANDBY</span>
+              </div>
+              <div class="kpi-footer-note">
+                HX711 24-Bit ADC + RC522
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Dashboard Workspace -->
+          <div class="workspace-grid" style="margin-top: 1.5rem;">
+            <!-- Left Column: Inventory Table & Overview -->
+            <div class="table-column">
+              <div class="dashboard-panel">
+                <div class="panel-header">
+                  <div>
+                    <div class="panel-title">
+                      <span>🌾 Grocery Product Inventory</span>
+                    </div>
+                    <div class="panel-subtitle">
+                      Sample packages (~500g each) with physical load cell weight verification
+                    </div>
+                  </div>
+
+                  <div class="table-toolbar">
+                    <div class="search-box">
+                      <span class="search-icon">🔍</span>
+                      <input type="text" id="searchInput" placeholder="Search by name or RFID UID...">
+                    </div>
+                    <select id="categoryFilter" class="filter-select">
+                      <option value="">All Categories</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="inventory-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Grocery Item</th>
+                        <th>Nominal Wt</th>
+                        <th>Stock Qty</th>
+                        <th>Measured Wt</th>
+                        <th>Inventory Status</th>
+                        <th>RFID UID</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                      <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                          Loading grocery inventory from MySQL...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Quick Operations Action Cards -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                <div class="dashboard-panel" style="padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="font-size: 1.2rem; margin-bottom: 0.35rem;">📥 <strong>Receive Goods (Stock In)</strong></div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                      Place items on scale platform, verify weight tolerance, and commit atomic stock increase.
+                    </p>
+                  </div>
+                  <a href="#stock-in" class="btn btn-teal btn-sm" style="text-align: center; text-decoration: none;">
+                    Go to Stock In &rarr;
+                  </a>
+                </div>
+
+                <div class="dashboard-panel" style="padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="font-size: 1.2rem; margin-bottom: 0.35rem;">📤 <strong>Dispatch Goods (Stock Out)</strong></div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                      Remove items from warehouse, enforce safe non-negative stock deduction, and log transactions.
+                    </p>
+                  </div>
+                  <a href="#stock-out" class="btn btn-primary btn-sm" style="text-align: center; text-decoration: none;">
+                    Go to Stock Out &rarr;
+                  </a>
+                </div>
+
+                <div class="dashboard-panel" style="padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="font-size: 1.2rem; margin-bottom: 0.35rem;">📦 <strong>Manage Products & RFID</strong></div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                      Create, edit specifications, assign RFID cards, and manage low-stock thresholds.
+                    </p>
+                  </div>
+                  <a href="#products" class="btn btn-secondary btn-sm" style="text-align: center; text-decoration: none;">
+                    Open Product Catalog &rarr;
+                  </a>
+                </div>
+              </div>
+
+              <!-- Curriculum Highlights Card -->
+              <div class="dashboard-panel" style="margin-top: 1.5rem;">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <span>📐 Engineering Curriculum Integration Summary</span>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.82rem;">
+                    <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--primary);">
+                      <strong style="color: var(--primary);">FastAPI & REST</strong><br>
+                      Validates Pydantic contracts, handles ACID transactions, and enforces 10kg load cell limit.
+                    </div>
+                    <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--teal);">
+                      <strong style="color: var(--teal);">MySQL & InnoDB</strong><br>
+                      Normalized 3NF relational schema with foreign key cascades and transactional audit logs.
+                    </div>
+                    <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--purple);">
+                      <strong style="color: var(--purple);">Data Structures</strong><br>
+                      O(1) Hash Table with chaining for RFID lookup and Min-Heap for real-time stock prioritization.
+                    </div>
+                    <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--warning);">
+                      <strong style="color: var(--warning);">MPCA Concepts</strong><br>
+                      HX711 24-bit two's complement sign-extension and SPI Little vs Big Endianness analysis.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Scale Monitor & Alerts -->
+            <div class="sidebar-column">
+              <!-- 10kg Load Cell Monitor -->
+              <div class="scale-monitor-card">
+                <div class="scale-monitor-header">
+                  <span class="scale-title">10kg Load Cell Live Monitor</span>
+                  <span class="scale-limit-badge">Max 10.00 kg</span>
+                </div>
+                <div class="scale-reading-display">
+                  <span id="scaleMonitorNumber" class="scale-big-number">0.00</span>
+                  <span class="scale-big-unit">kg on platform</span>
+                </div>
+                <div class="scale-track">
+                  <div id="scaleProgressBar" class="scale-fill"></div>
+                </div>
+                <div class="scale-markers">
+                  <span>0 kg</span>
+                  <span>2.5 kg</span>
+                  <span>5.0 kg</span>
+                  <span>7.5 kg</span>
+                  <span>10 kg (MAX)</span>
+                </div>
+                <div style="font-size: 0.73rem; color: #94a3b8; margin-top: 0.65rem;">
+                  HX711 24-bit differential strain gauge ADC · Overload protection active
+                </div>
+              </div>
+
+              <!-- Stock Alerts Panel -->
+              <div class="dashboard-panel">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <span>🚨 Priority Stock Alerts</span>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div id="alertContainer">
+                    <!-- Dynamically populated -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- MODULE 2: PRODUCT MANAGEMENT VIEW                             -->
+        <!-- ============================================================= -->
+        <section id="view-products" class="module-view">
+          <div class="dashboard-panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">
+                  <span>🌾 Product Management & Catalog</span>
+                  <span id="productCountBadge" class="status-pill status-in-stock" style="margin-left: 0.5rem;">0 Items</span>
+                </div>
+                <div class="panel-subtitle">
+                  Master product specifications with weight tolerances and RFID hardware bindings
+                </div>
+              </div>
+
+              <div class="table-toolbar">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="productSearchInput" placeholder="Search product name or RFID UID...">
+                </div>
+                <select id="productCategoryFilter" class="filter-select">
+                  <option value="">All Categories</option>
+                </select>
+                <select id="productStatusFilter" class="filter-select">
+                  <option value="">All Stock Statuses</option>
+                  <option value="IN_STOCK">In Stock</option>
+                  <option value="LOW_STOCK">Low Stock</option>
+                  <option value="OUT_OF_STOCK">Out of Stock</option>
+                </select>
+                <button id="openAddProductBtn" class="btn btn-teal btn-sm">
+                  ➕ Add New Product
+                </button>
+                <button id="refreshProductsBtn" class="btn btn-secondary btn-sm">
+                  🔄 Refresh
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="inventory-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Unit Weight</th>
+                    <th>Stock Qty</th>
+                    <th>Total Weight</th>
+                    <th>RFID UID</th>
+                    <th>Reorder Level</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productTableBody">
+                  <tr>
+                    <td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                      Loading master product catalog from MySQL...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- MODULE 3: STOCK IN VIEW                                       -->
+        <!-- ============================================================= -->
+        <section id="view-stock-in" class="module-view">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+            
+            <!-- Left: Interactive Stock In Form -->
+            <div class="operation-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">📥 Receive Stock (Stock In)</h3>
+                  <p style="font-size: 0.8rem; color: var(--text-muted);">Place goods on scale platform & commit to inventory</p>
+                </div>
+                <span class="op-badge-in">ACID STOCK_IN</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Select Grocery Item *</label>
+                <select id="stockInProductSelect" class="form-control">
+                  <option value="">-- Choose Product to Receive --</option>
+                </select>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label class="form-label">Quantity to Add (Units) *</label>
+                  <input type="number" id="stockInQtyInput" class="form-control" value="1" min="1" step="1">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Gross Measured Weight (g) *</label>
+                  <input type="number" id="stockInWeightInput" class="form-control" value="500.0" step="0.5" min="1.0">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">RFID Hardware Binding</label>
+                <input type="text" id="stockInRfidInput" class="form-control" placeholder="Auto-populated from paired product" readonly style="background-color: var(--bg-subtle);">
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">
+                  If product has no RFID tag, you can pair one first in Product Management.
+                </span>
+              </div>
+
+              <!-- Pre-check Scale Safety Meter -->
+              <div class="load-preview-box">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
+                  <span>10kg Load Cell Capacity Preview</span>
+                  <span id="stockInLoadText">0.00 kg &rarr; 0.00 kg / 10.00 kg</span>
+                </div>
+                <div class="load-preview-bar">
+                  <div id="stockInLoadBar" class="load-preview-fill" style="width: 0%;"></div>
+                </div>
+                <div id="stockInOverloadWarning" style="display: none; font-size: 0.75rem; color: var(--danger); font-weight: 600; margin-top: 0.25rem;">
+                  ⚠️ WARNING: This operation exceeds the 10.00 kg physical scale limit and will be rejected.
+                </div>
+              </div>
+
+              <button id="confirmStockInBtn" class="btn btn-teal" style="width: 100%; margin-top: 1.25rem; padding: 0.75rem;">
+                ⚡ Confirm Stock In & Log Transaction
+              </button>
+
+              <div id="stockInResultBox" class="sim-result-box" style="display: none; margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Right: Stock-In Instructions & Recent Inward Logs -->
+            <div>
+              <div class="dashboard-panel" style="margin-bottom: 1.5rem;">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <span>🛡️ Physical Load Cell Verification Rules</span>
+                  </div>
+                </div>
+                <div class="panel-body" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                  <ul style="padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li><strong>Nominal Weight Check:</strong> Incoming sample weight must be within allowable tolerance (typically &plusmn;35g of ~500g).</li>
+                    <li><strong>10kg Overload Guard:</strong> The system automatically verifies that <code>Current Load + Added Weight &le; 10,000g</code> before executing the SQL transaction.</li>
+                    <li><strong>Atomic COMMIT:</strong> If the scale check passes, product stock quantity and total weight are updated atomically, and an immutable record is saved in <code>inventory_transactions</code>.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="dashboard-panel">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <span>📋 Recent Stock In Transactions</span>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="inventory-table">
+                    <thead>
+                      <tr>
+                        <th>Time</th>
+                        <th>Product</th>
+                        <th>Delta</th>
+                        <th>Weight Added</th>
+                        <th>New Stock</th>
+                      </tr>
+                    </thead>
+                    <tbody id="stockInTransactionsBody">
+                      <tr>
+                        <td colspan="5" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
+                          No recent Stock In activity recorded.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- MODULE 4: STOCK OUT VIEW                                      -->
+        <!-- ============================================================= -->
+        <section id="view-stock-out" class="module-view">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+            
+            <!-- Left: Interactive Stock Out Form -->
+            <div class="operation-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">📤 Dispatch Stock (Stock Out)</h3>
+                  <p style="font-size: 0.8rem; color: var(--text-muted);">Remove goods from scale platform with non-negative validation</p>
+                </div>
+                <span class="op-badge-out">ACID STOCK_OUT</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Select Grocery Item to Dispatch *</label>
+                <select id="stockOutProductSelect" class="form-control">
+                  <option value="">-- Choose Product to Dispatch --</option>
+                </select>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label class="form-label">Available Stock</label>
+                  <input type="text" id="stockOutAvailableInput" class="form-control" value="0 units" readonly style="background-color: var(--bg-subtle); font-weight: 700;">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Quantity to Deduct *</label>
+                  <input type="number" id="stockOutQtyInput" class="form-control" value="1" min="1" step="1">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Measured Removal Weight (g) *</label>
+                <input type="number" id="stockOutWeightInput" class="form-control" value="500.0" step="0.5" min="1.0">
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">
+                  Must match expected nominal unit weight of item.
+                </span>
+              </div>
+
+              <div class="load-preview-box">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
+                  <span>Post-Dispatch Stock Balance</span>
+                  <span id="stockOutBalanceText">0 &rarr; 0 units</span>
+                </div>
+                <div id="stockOutZeroWarning" style="display: none; font-size: 0.75rem; color: var(--danger); font-weight: 600; margin-top: 0.5rem;">
+                  🚫 Cannot dispatch: Current inventory for this item is 0 units.
+                </div>
+              </div>
+
+              <button id="confirmStockOutBtn" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem; padding: 0.75rem;">
+                ⚡ Confirm Stock Out & Log Transaction
+              </button>
+
+              <div id="stockOutResultBox" class="sim-result-box" style="display: none; margin-top: 1rem;"></div>
+            </div>
+
+            <!-- Right: Stock-Out Rules & Recent Dispatch Logs -->
+            <div>
+              <div class="dashboard-panel" style="margin-bottom: 1.5rem;">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <span>🛡️ Safe Stock Deduction & Verification</span>
+                  </div>
+                </div>
+                <div class="panel-body" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                  <ul style="padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li><strong>Non-Negative Stock Guarantee:</strong> Requests to stock out items with 0 available units or quantity exceeding current stock are actively rejected with <code>HTTP 400 Bad Request</code>.</li>
+                    <li><strong>Platform Weight Recalculation:</strong> Removing items recalculates <code>products.current_total_weight</code> and updates warehouse platform load.</li>
+                    <li><strong>Audit Logging:</strong> Every removal creates an immutable entry in <code>inventory_transactions</code> with before/after units and weight deltas.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="dashboard-panel">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <span>📋 Recent Stock Out Transactions</span>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="inventory-table">
+                    <thead>
+                      <tr>
+                        <th>Time</th>
+                        <th>Product</th>
+                        <th>Delta</th>
+                        <th>Weight Removed</th>
+                        <th>Remaining Stock</th>
+                      </tr>
+                    </thead>
+                    <tbody id="stockOutTransactionsBody">
+                      <tr>
+                        <td colspan="5" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
+                          No recent Stock Out activity recorded.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- MODULE 5: RFID & HARDWARE VIEW                                -->
+        <!-- ============================================================= -->
+        <section id="view-rfid-hardware" class="module-view">
+          
+          <!-- Hardware Simulator Panel (Balanced Layout with Live JSON Preview) -->
+          <div class="dashboard-panel" style="margin-bottom: 1.75rem;">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">
+                  <span>🔬 Hardware & Scan Simulator</span>
+                </div>
+                <div class="panel-subtitle">
+                  Emulates ESP32 Wi-Fi transmission with RFID UID & 10kg Load Cell readings
+                </div>
+              </div>
+              <span class="json-preview-badge">POST /api/hardware/scan</span>
+            </div>
+            <div class="panel-body">
+              <div class="simulator-layout-grid">
+                
+                <!-- Controls -->
+                <div class="simulator-controls">
+                  <div class="form-group">
+                    <label class="form-label">Select Grocery Item</label>
+                    <select id="simProductSelect" class="form-control">
+                      <option value="">-- Choose Product --</option>
+                    </select>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div class="form-group">
+                      <label class="form-label">Operation Mode</label>
+                      <select id="simModeSelect" class="form-control">
+                        <option value="STOCK_IN">Stock In (Place on Scale)</option>
+                        <option value="STOCK_OUT">Stock Out (Remove from Scale)</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Simulated Weight (g)</label>
+                      <input type="number" id="simWeightInput" class="form-control" value="500.0" step="0.5">
+                    </div>
+                  </div>
+
+                  <button id="simScanBtn" class="btn btn-teal" style="width: 100%; margin-top: 0.25rem;">
+                    ⚡ Simulate Hardware Scan Event
+                  </button>
+
+                  <div id="simResultBox" class="sim-result-box" style="display: none;"></div>
+                </div>
+
+                <!-- Live JSON Preview -->
+                <div class="json-preview-container">
+                  <div class="json-preview-header">
+                    <span class="json-preview-title">
+                      <span>📡 Live JSON Payload Preview</span>
+                    </span>
+                    <span style="font-size: 0.68rem; color: #94a3b8; font-family: var(--font-mono);">HTTP Body</span>
+                  </div>
+                  <pre id="jsonPayloadPreview" class="json-preview-code">Loading preview...</pre>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Active RFID Tags Table & Hardware Architecture -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start;">
+            
+            <!-- RFID Tag Registry -->
+            <div class="dashboard-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">
+                    <span>🏷️ RFID Tag Directory & Product Bindings</span>
+                  </div>
+                  <div class="panel-subtitle">
+                    Active 13.56MHz RFID cards/fobs registered in MySQL
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="inventory-table">
+                  <thead>
+                    <tr>
+                      <th>Product ID</th>
+                      <th>Grocery Item</th>
+                      <th>Paired RFID UID</th>
+                      <th>Protocol</th>
+                      <th>Binding Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rfidDirectoryTableBody">
+                    <tr>
+                      <td colspan="6" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
+                        Loading RFID tag bindings...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Hardware Spec Cards -->
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <div class="hw-spec-card">
+                <div class="hw-spec-title">⚡ ESP32 Wi-Fi Microcontroller</div>
+                <div class="hw-spec-value">Xtensa&reg; 32-bit LX6 Dual-Core @ 240MHz</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem;">
+                  Transmits JSON telemetry over 802.11 b/g/n Wi-Fi directly to FastAPI endpoint <code>/api/hardware/scan</code>.
+                </p>
+              </div>
+
+              <div class="hw-spec-card">
+                <div class="hw-spec-title">📡 RFID-RC522 Module</div>
+                <div class="hw-spec-value">13.56 MHz SPI Serial Interface</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem;">
+                  Reads 8-digit Hexadecimal UID from MIFARE Classic / Ultralight tags with anti-collision protocol.
+                </p>
+              </div>
+
+              <div class="hw-spec-card">
+                <div class="hw-spec-title">⚖️ HX711 24-Bit ADC</div>
+                <div class="hw-spec-value">Two's Complement Differential Strain Gauge</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem;">
+                  High-precision PGA (Gain 128) calibrated for 10.00 kg maximum platform capacity.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- MODULE 6: ANALYTICS & REPORTS VIEW                            -->
+        <!-- ============================================================= -->
+        <section id="view-analytics" class="module-view">
+          
+          <!-- Visual Charts Grid -->
+          <div class="charts-grid">
+            <!-- Chart 1: Stock Quantity vs Reorder Level -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">📊 Stock Quantity vs. Reorder Threshold</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">Units per grocery item</span>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="stockLevelChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 2: Warehouse Scale Weight Distribution -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">⚖️ Physical Weight on Platform (grams)</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">Max 10,000 g</span>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="weightDistributionChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction Audit Trail Table -->
+          <div class="dashboard-panel" style="margin-top: 1.5rem;">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">
+                  <span>📜 Immutable Transaction Audit Trail</span>
+                </div>
+                <div class="panel-subtitle">
+                  Historical database log of all physical stock movements and scale load adjustments
+                </div>
+              </div>
+              <button id="refreshTransactionsBtn" class="btn btn-secondary btn-sm">
+                🔄 Refresh Logs
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="inventory-table">
+                <thead>
+                  <tr>
+                    <th>Log ID</th>
+                    <th>Timestamp</th>
+                    <th>Product Name</th>
+                    <th>Type</th>
+                    <th>Qty Delta</th>
+                    <th>Weight Delta</th>
+                    <th>Stock Units (Before &rarr; After)</th>
+                    <th>Platform Weight (Before &rarr; After)</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionsTableBody">
+                  <tr>
+                    <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                      Loading transaction records from MySQL...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- MODULE 7: ACADEMIC & VIVA INSPECTOR VIEW                      -->
+        <!-- ============================================================= -->
+        <section id="view-academic" class="module-view">
+          
+          <!-- Section 1: Hash Table -->
+          <div class="academic-section">
+            <div class="academic-title">
+              <span>1. Data Structures: O(1) RFID Hash Table</span>
+              <span class="academic-badge">Hash Map with Chaining</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Maps physical 8-character RFID hex UIDs to grocery products in $O(1)$ average time complexity using polynomial rolling hash and separate chaining collision resolution.
+            </p>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+              <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+                <span class="kpi-label">Capacity</span>
+                <span id="htCapacity" class="kpi-value" style="font-size: 1.4rem;">16</span>
+                <span class="kpi-unit">Buckets</span>
+              </div>
+              <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+                <span class="kpi-label">Item Count</span>
+                <span id="htCount" class="kpi-value" style="font-size: 1.4rem;">0</span>
+                <span class="kpi-unit">Paired UIDs</span>
+              </div>
+              <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+                <span class="kpi-label">Load Factor (&alpha;)</span>
+                <span id="htLoadFactor" class="kpi-value" style="font-size: 1.4rem;">0.00</span>
+                <span class="kpi-unit">n / capacity</span>
+              </div>
+              <div style="display: flex; align-items: center;">
+                <button id="refreshHtBtn" class="btn btn-secondary btn-sm">🔄 Refresh Buckets</button>
+              </div>
+            </div>
+
+            <div class="code-box">
+// Polynomial Rolling Hash Formula:
+hash_val = sum(ord(char) * 31^i) % capacity
+            </div>
+
+            <div style="font-weight: 700; font-size: 0.85rem; margin-top: 1rem;">
+              Live Hash Table Bucket Allocation (Separate Chaining):
+            </div>
+            <div id="htChainsContainer" class="bucket-chain-list"></div>
+          </div>
+
+          <!-- Section 2: Binary Min-Heap -->
+          <div class="academic-section">
+            <div class="academic-title">
+              <span>2. Data Structures: Binary Min-Heap</span>
+              <span class="academic-badge">Priority Queue</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Maintains real-time priority ranking of low-stock groceries. The item with the lowest stock quantity is maintained at the root node ($O(1)$ peek, $O(\log N)$ extraction).
+            </p>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+              <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+                <span class="kpi-label">Heap Size</span>
+                <span id="heapSize" class="kpi-value" style="font-size: 1.4rem;">0</span>
+                <span class="kpi-unit">Nodes</span>
+              </div>
+              <div class="kpi-card" style="flex: 2; min-width: 220px; padding: 0.75rem 1rem;">
+                <span class="kpi-label">Root Node (Most Critical Item)</span>
+                <span id="heapRootItem" class="kpi-value" style="font-size: 1.15rem; color: var(--danger);">Loading...</span>
+                <span class="kpi-unit">Lowest stock</span>
+              </div>
+              <div style="display: flex; align-items: center;">
+                <button id="refreshHeapBtn" class="btn btn-secondary btn-sm">🔄 Refresh Heap</button>
+              </div>
+            </div>
+
+            <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem;">
+              Internal Array View of Complete Binary Tree:
+            </div>
+            <div id="heapArrayView" class="heap-tree-view">Loading heap array...</div>
+          </div>
+
+          <!-- Section 3: Search Benchmark -->
+          <div class="academic-section">
+            <div class="academic-title">
+              <span>3. Algorithms: Linear vs. Binary Search Benchmark</span>
+              <span class="academic-badge">O(N) vs. O(log N)</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Directly compare the execution steps of sequential Linear Search vs. divide-and-conquer Binary Search across warehouse inventory.
+            </p>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+              <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+                <label class="form-label">Search Key</label>
+                <select id="searchKeySelect" class="form-control">
+                  <option value="id">Product ID</option>
+                  <option value="name">Product Name</option>
+                  <option value="unit_weight_grams">Nominal Weight (g)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+                <label class="form-label">Target Search Value</label>
+                <input type="text" id="searchTargetInput" class="form-control" value="4" placeholder="e.g. 4 or Basmati Rice">
+              </div>
+              <button id="runSearchBtn" class="btn btn-teal">
+                ⚡ Run Complexity Benchmark
+              </button>
+            </div>
+
+            <div id="searchResultsDiv" class="hw-spec-card" style="display: none;"></div>
+          </div>
+
+          <!-- Section 4: MPCA Two's Complement -->
+          <div class="academic-section">
+            <div class="academic-title">
+              <span>4. MPCA: HX711 24-Bit ADC Two's Complement Decoder</span>
+              <span class="academic-badge">Computer Architecture</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              The HX711 analog-to-digital converter outputs a 24-bit signed integer. Bit 23 is the MSB (sign bit). This utility performs 32-bit sign extension: <code>signed_val = raw_24bit - (1 &lt;&lt; 24)</code>.
+            </p>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+              <div class="form-group" style="margin-bottom: 0; min-width: 220px;">
+                <label class="form-label">Raw 24-Bit ADC Hex Value</label>
+                <input type="text" id="hexInput" class="form-control" value="0x7FFFFF" placeholder="e.g. 0x7FFFFF or 0xFFFFFF">
+              </div>
+              <button id="decodeTwosBtn" class="btn btn-teal">
+                🔬 Decode Two's Complement
+              </button>
+            </div>
+
+            <div id="twosResultDiv" class="hw-spec-card" style="display: none;"></div>
+          </div>
+
+          <!-- Section 5: Endianness Analyzer -->
+          <div class="academic-section">
+            <div class="academic-title">
+              <span>5. MPCA: RFID Endianness & Bus Memory Order</span>
+              <span class="academic-badge">Hardware Communication</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Analyzes the difference between Big-Endian transmission (SPI wire order used by RC522) and Little-Endian memory storage (ESP32 Xtensa LX6 CPU architecture).
+            </p>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+              <div class="form-group" style="margin-bottom: 0; min-width: 220px;">
+                <label class="form-label">RFID UID Hex String</label>
+                <input type="text" id="endianInput" class="form-control" value="E280689A" placeholder="e.g. E280689A">
+              </div>
+              <button id="analyzeEndianBtn" class="btn btn-teal">
+                🔍 Analyze Memory Layout
+              </button>
+            </div>
+
+            <div id="endianResultDiv" class="hw-spec-card" style="display: none;"></div>
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- SHARED MODAL 1: PAIR RFID TAG                                     -->
+  <!-- ================================================================= -->
+  <div id="rfidModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Pair Physical RFID Tag</h3>
+        <button id="modalCloseX" class="modal-close">&times;</button>
+      </div>
+      <div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Assign an 8-character Hex UID to: <strong id="modalProductName">Product</strong>
+        </p>
+        <div class="form-group">
+          <label class="form-label">RFID Tag UID (Hex) *</label>
+          <input type="text" id="modalRfidInput" class="form-control" placeholder="e.g. E280689A" maxlength="32">
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.35rem;">
+            Enter 8-character hex serial read by RC522. Unique constraint enforced in MySQL.
+          </span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalCancelBtn" class="btn btn-secondary">Cancel</button>
+        <button id="modalSaveBtn" class="btn btn-primary">Save RFID Pairing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- SHARED MODAL 2: ADD NEW PRODUCT                                   -->
+  <!-- ================================================================= -->
+  <div id="addProductModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">➕ Add New Grocery Product</h3>
+        <button id="closeAddModalX" class="modal-close">&times;</button>
+      </div>
+      <div>
+        <div class="form-group">
+          <label class="form-label">Product Name *</label>
+          <input type="text" id="addNameInput" class="form-control" placeholder="e.g. Organic Brown Rice (500g)" maxlength="100">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="addCategorySelect" class="form-control">
+              <option value="">-- Select Category --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Unit Weight (grams) *</label>
+            <input type="number" id="addWeightInput" class="form-control" value="500.0" step="0.5" min="1.0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Weight Tolerance (±g)</label>
+            <input type="number" id="addToleranceInput" class="form-control" value="35.0" step="0.5" min="5.0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Reorder Level (units)</label>
+            <input type="number" id="addReorderInput" class="form-control" value="2" min="0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Initial Stock Quantity</label>
+            <input type="number" id="addInitialStockInput" class="form-control" value="0" min="0">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Will be logged as initial stock</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Optional RFID UID (Hex)</label>
+            <input type="text" id="addRfidInput" class="form-control" placeholder="e.g. A1B2C3D4" maxlength="32">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Can be assigned later</span>
+          </div>
+        </div>
+
+        <div id="addModalError" class="sim-result-box" style="display: none; background-color: var(--danger-light); border-color: var(--danger-border); color: #7f1d1d;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelAddBtn" class="btn btn-secondary">Cancel</button>
+        <button id="saveAddBtn" class="btn btn-teal">Create Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- SHARED MODAL 3: EDIT PRODUCT                                      -->
+  <!-- ================================================================= -->
+  <div id="editProductModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Edit Product Specifications</h3>
+        <button id="closeEditModalX" class="modal-close">&times;</button>
+      </div>
+      <div>
+        <input type="hidden" id="editProductId">
+
+        <div class="form-group">
+          <label class="form-label">Product Name *</label>
+          <input type="text" id="editNameInput" class="form-control" maxlength="100">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="editCategorySelect" class="form-control"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Unit Weight (grams) *</label>
+            <input type="number" id="editWeightInput" class="form-control" step="0.5" min="1.0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Weight Tolerance (±g)</label>
+            <input type="number" id="editToleranceInput" class="form-control" step="0.5" min="5.0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Reorder Level (units)</label>
+            <input type="number" id="editReorderInput" class="form-control" min="0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Adjust Stock Quantity</label>
+            <input type="number" id="editStockQtyInput" class="form-control" min="0">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Adjustments log an audit record</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">RFID Tag UID (Hex)</label>
+            <input type="text" id="editRfidInput" class="form-control" placeholder="Leave empty to unassign" maxlength="32">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Must be unique</span>
+          </div>
+        </div>
+
+        <div id="editModalError" class="sim-result-box" style="display: none; background-color: var(--danger-light); border-color: var(--danger-border); color: #7f1d1d;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+        <button id="saveEditBtn" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- SHARED MODAL 4: DELETE PRODUCT CONFIRMATION                       -->
+  <!-- ================================================================= -->
+  <div id="deleteModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">🗑️ Delete Product</h3>
+        <button id="closeDeleteModalX" class="modal-close">&times;</button>
+      </div>
+      <div>
+        <p style="font-size: 0.88rem; margin-bottom: 0.75rem;">
+          Are you sure you want to permanently delete:
+          <br><strong id="deleteProductName" style="font-size: 1.05rem; color: var(--text-main);">Product Name</strong>?
+        </p>
+        <div style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-subtle); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--danger);">
+          ⚠️ <strong>Safety Rule:</strong> Products with existing physical stock or transaction history cannot be deleted to preserve database referential integrity.
+        </div>
+        <div id="deleteModalError" class="sim-result-box" style="display: none; background-color: var(--danger-light); border-color: var(--danger-border); color: #7f1d1d; margin-top: 0.75rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+        <button id="confirmDeleteBtn" class="btn btn-sm" style="background-color: var(--danger); color: white; padding: 0.5rem 1rem;">
+          Confirm Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unified Scripts: API Client & Unified Dashboard Controller -->
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

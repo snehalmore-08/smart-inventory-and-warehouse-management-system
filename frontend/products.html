@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Inventory System | Product Management</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Seamless routing into the unified application portal
+    window.location.replace("index.html#products");
+  </script>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- ================================================================= -->
+    <!-- Dark Navy Sidebar                                                 -->
+    <!-- ================================================================= -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="brand-wrapper">
+          <div class="brand-icon">📦</div>
+          <div>
+            <div class="brand-name">SmartWarehouse</div>
+            <div class="brand-sub">Catalog Manager</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Navigation</div>
+        <ul class="sidebar-menu">
+          <li>
+            <a href="index.html" class="nav-item">
+              <span class="nav-icon">📊</span>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="products.html" class="nav-item active">
+              <span class="nav-icon">📦</span>
+              <span>Product Catalog</span>
+            </a>
+          </li>
+          <li>
+            <a href="academic.html" class="nav-item">
+              <span class="nav-icon">🎓</span>
+              <span>Academic & Viva</span>
+            </a>
+          </li>
+          <li>
+            <a href="http://127.0.0.1:8000/docs" target="_blank" class="nav-item">
+              <span class="nav-icon">📑</span>
+              <span>FastAPI Swagger</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="nav-section-label">Inventory Rules</div>
+        <ul class="sidebar-menu">
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">⚖️</span>
+              <span>~500g Sample Units</span>
+            </div>
+          </li>
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">🛡️</span>
+              <span>10kg Platform Limit</span>
+            </div>
+          </li>
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">🔒</span>
+              <span>ACID Row Locking</span>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="hw-pill">
+          <span><span class="hw-dot"></span>MySQL Engine</span>
+          <strong style="color: #38bdf8;">InnoDB 3NF</strong>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================================================================= -->
+    <!-- Main Application Shell                                            -->
+    <!-- ================================================================= -->
+    <div class="app-main">
+
+      <!-- Top App Bar -->
+      <header class="top-appbar">
+        <div class="appbar-title-group">
+          <h2>Product Management & Catalog</h2>
+          <p>Create, edit, assign RFID tags, adjust stock, and manage grocery SKU specifications</p>
+        </div>
+        <div class="appbar-actions">
+          <button id="openAddProductBtn" class="btn btn-teal">
+            ➕ Add New Product
+          </button>
+          <button id="refreshProductsBtn" class="btn btn-secondary btn-sm">
+            🔄 Refresh
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Canvas -->
+      <main class="content-canvas">
+
+        <!-- Global Toast / Alert Message Container -->
+        <div id="toastContainer" style="margin-bottom: 1.25rem; display: none;"></div>
+
+        <!-- Panel: Product Catalog Table -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">
+                <span>🌾 Registered Grocery Products</span>
+                <span id="productCountBadge" class="status-pill status-in-stock" style="margin-left: 0.5rem;">0 Items</span>
+              </div>
+              <div class="panel-subtitle">
+                Master product specifications with weight tolerances and RFID hardware bindings
+              </div>
+            </div>
+
+            <!-- Toolbar: Search & Multi-Filters -->
+            <div class="table-toolbar">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="productSearchInput" placeholder="Search by product name or RFID UID...">
+              </div>
+              <select id="productCategoryFilter" class="filter-select">
+                <option value="">All Categories</option>
+              </select>
+              <select id="productStatusFilter" class="filter-select">
+                <option value="">All Stock Statuses</option>
+                <option value="IN_STOCK">In Stock</option>
+                <option value="LOW_STOCK">Low Stock</option>
+                <option value="OUT_OF_STOCK">Out of Stock</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="inventory-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Unit Weight</th>
+                  <th>Stock Qty</th>
+                  <th>Total Weight</th>
+                  <th>RFID UID</th>
+                  <th>Reorder Level</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsTableBody">
+                <tr>
+                  <td colspan="10" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    Loading product catalog from MySQL...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Architecture & Safe Product Operations Reference Card -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📋 Product Management Architecture Rules</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; font-size: 0.82rem;">
+              <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--teal);">
+                <strong style="color: var(--teal);">Stock Adjustment Safety</strong><br>
+                Direct quantity adjustments calculate expected total weight and verify that the 10kg load cell capacity limit is never exceeded.
+              </div>
+              <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--primary);">
+                <strong style="color: var(--primary);">RFID Uniqueness Check</strong><br>
+                Every RFID tag UID must be unique. Updating or pairing a tag checks for collisions across all registered products.
+              </div>
+              <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--purple);">
+                <strong style="color: var(--purple);">In-Memory DS Synchronization</strong><br>
+                Adding, updating, or deleting products automatically rebuilds the $O(1)$ Hash Table and Min-Heap Priority Queue.
+              </div>
+              <div style="background-color: var(--bg-subtle); padding: 0.85rem; border-radius: 6px; border-left: 3px solid var(--danger);">
+                <strong style="color: var(--danger);">Referential Deletion Protection</strong><br>
+                Products with recorded transaction history or existing physical stock cannot be deleted, preserving audit integrity.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 1: ADD NEW PRODUCT                                          -->
+  <!-- ================================================================= -->
+  <div id="addProductModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">➕ Add New Grocery Product</h3>
+        <button id="closeAddModalX" class="modal-close">&times;</button>
+      </div>
+      <div>
+        <div class="form-group">
+          <label class="form-label">Product Name *</label>
+          <input type="text" id="addNameInput" class="form-control" placeholder="e.g. Organic Brown Rice (500g)" maxlength="100">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="addCategorySelect" class="form-control">
+              <option value="">-- Select Category --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Unit Weight (grams) *</label>
+            <input type="number" id="addWeightInput" class="form-control" value="500.0" step="0.5" min="1.0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Weight Tolerance (±g)</label>
+            <input type="number" id="addToleranceInput" class="form-control" value="35.0" step="0.5" min="5.0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Reorder Level (units)</label>
+            <input type="number" id="addReorderInput" class="form-control" value="2" min="0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Initial Stock Quantity</label>
+            <input type="number" id="addInitialStockInput" class="form-control" value="0" min="0">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Will be logged as initial stock</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Optional RFID UID (Hex)</label>
+            <input type="text" id="addRfidInput" class="form-control" placeholder="e.g. A1B2C3D4" maxlength="32">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Can be assigned later</span>
+          </div>
+        </div>
+
+        <div id="addModalError" class="sim-result-box" style="display: none; background-color: var(--danger-light); border-color: var(--danger-border); color: #7f1d1d;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelAddBtn" class="btn btn-secondary">Cancel</button>
+        <button id="saveAddBtn" class="btn btn-teal">Create Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 2: EDIT PRODUCT                                             -->
+  <!-- ================================================================= -->
+  <div id="editProductModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Edit Product Specifications</h3>
+        <button id="closeEditModalX" class="modal-close">&times;</button>
+      </div>
+      <div>
+        <input type="hidden" id="editProductId">
+
+        <div class="form-group">
+          <label class="form-label">Product Name *</label>
+          <input type="text" id="editNameInput" class="form-control" maxlength="100">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="editCategorySelect" class="form-control"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Unit Weight (grams) *</label>
+            <input type="number" id="editWeightInput" class="form-control" step="0.5" min="1.0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Weight Tolerance (±g)</label>
+            <input type="number" id="editToleranceInput" class="form-control" step="0.5" min="5.0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Reorder Level (units)</label>
+            <input type="number" id="editReorderInput" class="form-control" min="0">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Adjust Stock Quantity</label>
+            <input type="number" id="editStockQtyInput" class="form-control" min="0">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Adjustments log an audit record</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">RFID Tag UID (Hex)</label>
+            <input type="text" id="editRfidInput" class="form-control" placeholder="Leave empty to unassign" maxlength="32">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Must be unique</span>
+          </div>
+        </div>
+
+        <div id="editModalError" class="sim-result-box" style="display: none; background-color: var(--danger-light); border-color: var(--danger-border); color: #7f1d1d;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+        <button id="saveEditBtn" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 3: DELETE PRODUCT CONFIRMATION                              -->
+  <!-- ================================================================= -->
+  <div id="deleteModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">🗑️ Delete Product</h3>
+        <button id="closeDeleteModalX" class="modal-close">&times;</button>
+      </div>
+      <div>
+        <p style="font-size: 0.88rem; margin-bottom: 0.75rem;">
+          Are you sure you want to permanently delete:
+          <br><strong id="deleteProductName" style="font-size: 1.05rem; color: var(--text-main);">Product Name</strong>?
+        </p>
+        <div style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-subtle); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--danger);">
+          ⚠️ <strong>Safety Rule:</strong> Products with existing physical stock or transaction history cannot be deleted to preserve database referential integrity.
+        </div>
+        <div id="deleteModalError" class="sim-result-box" style="display: none; background-color: var(--danger-light); border-color: var(--danger-border); color: #7f1d1d; margin-top: 0.75rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+        <button id="confirmDeleteBtn" class="btn btn-sm" style="background-color: var(--danger); color: white; padding: 0.5rem 1rem;">
+          Confirm Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/products.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+SMART INVENTORY AND WAREHOUSE MANAGEMENT SYSTEM
+
+Hardware–Software Integration Flow
+
+1. RFID Product Identification
+The RFID RC522 reader scans the RFID tag attached to a product. The scanned tag ID is used to identify the corresponding product in the inventory system.
+
+2. ESP32 Controller
+The ESP32 receives RFID scan information and collects sensor readings. It acts as the main hardware controller.
+
+3. Weight Measurement
+The Load Cell measures the weight of the product. The HX711 module processes the load cell signal and provides readings to the ESP32.
+
+4. Data Processing
+The ESP32 processes the RFID information, weight readings, and stock movement operation (Stock In or Stock Out).
+
+5. Wi-Fi Communication
+The ESP32 uses Wi-Fi to send inventory-related data to the backend server through an API request.
+
+6. Backend API
+The Python FastAPI backend receives the hardware data, validates the request, identifies the product, and processes the inventory transaction.
+
+7. MySQL Database
+The processed transaction is stored in the MySQL database. Stock quantity, weight information, and transaction history are updated.
+
+8. Dashboard & Analytics
+The frontend dashboard retrieves updated data from the backend and displays inventory quantities, weight information, stock alerts, analytics, and transaction logs.
+
+Integration Flow:
+
+RFID RC522 + Load Cell
+          ↓
+       HX711
+          ↓
+        ESP32
+          ↓
+    Wi-Fi Communication
+          ↓
+ Python FastAPI Backend
+          ↓
+    MySQL Database
+          ↓
+ Web Dashboard & Analytics
+
+Hardware Components:
+- ESP32 Microcontroller
+- RFID RC522 Reader
+- RFID Tags
+- Load Cell (10 kg)
+- HX711 Amplifier Module
+
+Software Technologies:
+- Python
+- FastAPI
+- MySQL
+- HTML
+- CSS
+- JavaScript
+- Arduino C/C++
+
+Note:
+Software-side integration and simulator-based operations have been verified. Physical hardware-to-server integration requires final testing with the actual ESP32, RFID reader, and Load Cell setup.

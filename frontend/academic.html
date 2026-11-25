@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Inventory System | Academic & Viva Inspector</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Seamless routing into the unified application portal
+    window.location.replace("index.html#academic");
+  </script>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- Dark Navy Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="brand-wrapper">
+          <div class="brand-icon">🎓</div>
+          <div>
+            <div class="brand-name">Academic Viva</div>
+            <div class="brand-sub">DS & MPCA Inspector</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Navigation</div>
+        <ul class="sidebar-menu">
+          <li>
+            <a href="index.html" class="nav-item">
+              <span class="nav-icon">📊</span>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="products.html" class="nav-item">
+              <span class="nav-icon">📦</span>
+              <span>Product Catalog</span>
+            </a>
+          </li>
+          <li>
+            <a href="academic.html" class="nav-item active">
+              <span class="nav-icon">🎓</span>
+              <span>Academic & Viva</span>
+            </a>
+          </li>
+          <li>
+            <a href="http://127.0.0.1:8000/docs" target="_blank" class="nav-item">
+              <span class="nav-icon">📑</span>
+              <span>FastAPI Swagger</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="nav-section-label">Subjects Evaluated</div>
+        <ul class="sidebar-menu">
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">🗂️</span>
+              <span>O(1) Hash Table</span>
+            </div>
+          </li>
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">🌲</span>
+              <span>Min-Heap Tree</span>
+            </div>
+          </li>
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">🔍</span>
+              <span>Search Benchmark</span>
+            </div>
+          </li>
+          <li>
+            <div class="nav-item" style="cursor: default;">
+              <span class="nav-icon">⚙️</span>
+              <span>MPCA 2's Complement</span>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="hw-pill">
+          <span><span class="hw-dot"></span>Curriculum Mode</span>
+          <strong style="color: #38bdf8;">Engineering</strong>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Shell -->
+    <div class="app-main">
+
+      <!-- Top App Bar -->
+      <header class="top-appbar">
+        <div class="appbar-title-group">
+          <h2>Subject Integration & Viva Inspector</h2>
+          <p>Interactive verification tool for Data Structures and Microprocessor Architecture concepts</p>
+        </div>
+        <div class="appbar-actions">
+          <a href="index.html" class="btn btn-secondary btn-sm">
+            ⬅ Return to Dashboard
+          </a>
+        </div>
+      </header>
+
+      <!-- Content Canvas -->
+      <main class="content-canvas">
+
+        <!-- ============================================================= -->
+        <!-- SECTION 1: DATA STRUCTURES                                    -->
+        <!-- ============================================================= -->
+        <section class="academic-section">
+          <div class="academic-title">
+            <span>1. Data Structures: O(1) RFID Hash Table</span>
+            <span class="academic-badge">Hash Map with Chaining</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            Maps physical 8-character RFID hex UIDs to grocery products in $O(1)$ average time complexity using polynomial rolling hash and separate chaining collision resolution.
+          </p>
+
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+              <span class="kpi-label">Capacity</span>
+              <span id="htCapacity" class="kpi-value" style="font-size: 1.4rem;">16</span>
+              <span class="kpi-unit">Buckets</span>
+            </div>
+            <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+              <span class="kpi-label">Item Count</span>
+              <span id="htCount" class="kpi-value" style="font-size: 1.4rem;">0</span>
+              <span class="kpi-unit">Paired UIDs</span>
+            </div>
+            <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+              <span class="kpi-label">Load Factor (&alpha;)</span>
+              <span id="htLoadFactor" class="kpi-value" style="font-size: 1.4rem;">0.00</span>
+              <span class="kpi-unit">n / capacity</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <button id="refreshHtBtn" class="btn btn-secondary btn-sm">🔄 Refresh Buckets</button>
+            </div>
+          </div>
+
+          <div class="code-box">
+// Polynomial Rolling Hash Formula:
+hash_val = sum(ord(char) * 31^i) % capacity
+          </div>
+
+          <div style="font-weight: 700; font-size: 0.85rem; margin-top: 1rem;">
+            Live Hash Table Bucket Allocation (Separate Chaining):
+          </div>
+          <div id="htChainsContainer" class="bucket-chain-list"></div>
+        </section>
+
+        <!-- Section 2: Priority Queue & Min-Heap -->
+        <section class="academic-section">
+          <div class="academic-title">
+            <span>2. Data Structures: Binary Min-Heap</span>
+            <span class="academic-badge">Priority Queue</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            Maintains real-time priority ranking of low-stock groceries. The item with the lowest stock quantity is maintained at the root node ($O(1)$ peek, $O(\log N)$ extraction).
+          </p>
+
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div class="kpi-card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem;">
+              <span class="kpi-label">Heap Size</span>
+              <span id="heapSize" class="kpi-value" style="font-size: 1.4rem;">0</span>
+              <span class="kpi-unit">Nodes</span>
+            </div>
+            <div class="kpi-card" style="flex: 2; min-width: 220px; padding: 0.75rem 1rem;">
+              <span class="kpi-label">Root Node (Most Critical Item)</span>
+              <span id="heapRootItem" class="kpi-value" style="font-size: 1.15rem; color: var(--danger);">Loading...</span>
+              <span class="kpi-unit">Lowest stock</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <button id="refreshHeapBtn" class="btn btn-secondary btn-sm">🔄 Refresh Heap</button>
+            </div>
+          </div>
+
+          <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem;">
+            Internal Array View of Complete Binary Tree:
+          </div>
+          <div id="heapArrayView" class="heap-tree-view">Loading heap array...</div>
+        </section>
+
+        <!-- Section 3: Search Complexity Benchmark -->
+        <section class="academic-section">
+          <div class="academic-title">
+            <span>3. Algorithms: Linear vs. Binary Search Benchmark</span>
+            <span class="academic-badge">O(N) vs. O(log N)</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            Directly compare the execution steps of sequential Linear Search vs. divide-and-conquer Binary Search across warehouse inventory.
+          </p>
+
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+              <label class="form-label">Search Key</label>
+              <select id="searchKeySelect" class="form-control">
+                <option value="id">Product ID</option>
+                <option value="name">Product Name</option>
+                <option value="unit_weight_grams">Nominal Weight (g)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+              <label class="form-label">Target Search Value</label>
+              <input type="text" id="searchTargetInput" class="form-control" value="4" placeholder="e.g. 4 or Basmati Rice">
+            </div>
+            <button id="runSearchBtn" class="btn btn-teal">
+              ⚡ Run Complexity Benchmark
+            </button>
+          </div>
+
+          <div id="searchResultsDiv" class="hw-spec-card" style="display: none;"></div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- SECTION 2: MPCA CONCEPTS                                      -->
+        <!-- ============================================================= -->
+        <section class="academic-section">
+          <div class="academic-title">
+            <span>4. MPCA: HX711 24-Bit ADC Two's Complement Decoder</span>
+            <span class="academic-badge">Computer Architecture</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            The HX711 analog-to-digital converter outputs a 24-bit signed integer. Bit 23 is the MSB (sign bit). This utility performs 32-bit sign extension: <code>signed_val = raw_24bit - (1 &lt;&lt; 24)</code>.
+          </p>
+
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0; min-width: 220px;">
+              <label class="form-label">Raw 24-Bit ADC Hex Value</label>
+              <input type="text" id="hexInput" class="form-control" value="0x7FFFFF" placeholder="e.g. 0x7FFFFF or 0xFFFFFF">
+            </div>
+            <button id="decodeTwosBtn" class="btn btn-teal">
+              🔬 Decode Two's Complement
+            </button>
+          </div>
+
+          <div id="twosResultDiv" class="hw-spec-card" style="display: none;"></div>
+        </section>
+
+        <!-- Section 5: Endianness Analyzer -->
+        <section class="academic-section">
+          <div class="academic-title">
+            <span>5. MPCA: RFID Endianness & Bus Memory Order</span>
+            <span class="academic-badge">Hardware Communication</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            Analyzes the difference between Big-Endian transmission (SPI wire order used by RC522) and Little-Endian memory storage (ESP32 Xtensa LX6 CPU architecture).
+          </p>
+
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0; min-width: 220px;">
+              <label class="form-label">RFID UID Hex String</label>
+              <input type="text" id="endianInput" class="form-control" value="E280689A" placeholder="e.g. E280689A">
+            </div>
+            <button id="analyzeEndianBtn" class="btn btn-teal">
+              🔍 Analyze Memory Layout
+            </button>
+          </div>
+
+          <div id="endianResultDiv" class="hw-spec-card" style="display: none;"></div>
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/academic.js"></script>
+</body>
+</html>
